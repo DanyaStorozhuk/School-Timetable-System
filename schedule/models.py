@@ -43,7 +43,7 @@ class Class(models.Model):
 
 class Students(models.Model):
     name = models.CharField(max_length=30)
-    title = models.TextChoices()
+    title = models.TextField()
     age = models.IntegerField()
     email = models.EmailField()
     # student_class - це назва поля моделі
@@ -57,3 +57,22 @@ class Students(models.Model):
 
     def __str__(self):
         return self.name
+    
+class Schedule(models.Model):
+    day = models.CharField(max_length=15)
+    students = models.ForeignKey(Students, on_delete=models.CASCADE, related_name="schedule")
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    subject = models.CharField(max_length=30)
+    time_start = models.DateField()
+    time_end = models.DateField()
+
+    def __str__(self):
+        return self.day
+
+
+
+class Grade(models.Model):
+    grade = models.IntegerField()
+    students = models.ForeignKey(Students, on_delete=models.CASCADE)
+    
+

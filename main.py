@@ -1,6 +1,15 @@
-from schedule.models import Teacher, Class, Students, Subject
+import os
+import django
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "school_timetable.settings")
 
 
+django.setup()
+
+
+
+from django.core.exceptions import ObjectDoesNotExist
+from schedule.models import Teacher, Class, Students, Subject, Schedule, Grade
 t1 = Teacher.objects.create(name="Ivan Petrow")
 t2 = Teacher.objects.create(name="Olga Nikitiokova")
 t3 = Teacher.objects.create(name="Oleg Shevchenko")
@@ -21,3 +30,188 @@ Subject.objects.create(name='Mathematics', teacher=t1)
 Subject.objects.create(name='English', teacher=t2)
 Subject.objects.create(name='History', teacher=t3)
 Subject.objects.create(name='Science', teacher=t1)
+
+
+def add_subject():
+    print("\nДодавання предмета")
+    name = input("Введіть назву предмета: ").strip().lower()
+    description = input("Введіть опис предмета:").strip().lower()
+
+    if not name:
+        print("Назва предмета не може бути порожньою")
+        return
+    
+    # якщо предмет з такою назвою вже існує
+    if Subject.objects.filter(name = name).exists():
+        print("Предмет з такою назвою вже існує")
+        return
+    
+    subject = Subject(name = name, description = description)
+    subject.save()
+    print(f"Предмет {name} успішно додано!")
+
+
+def add_teacher():
+    print("\nДодавання Вчителя")
+    name = input("Введіть назву Вчителля:").strip().lower()
+    age = input("Ведіть ваш вік").strip().lower()
+    email = input("Веддіть вашу почту").strip().lower()
+    subject = input("Веддіть предмет який веде цей вчитель").strip().lower()
+
+    if not all([name, age, email, subject]):
+        print("Поля не можуть бути порожні")
+        return
+
+    try:
+        subject = Subject.objects.get(name = subject)
+    except ObjectDoesNotExist:
+        print(f"Предмет '{subject}' не знайдено!")
+        return
+    
+
+    try:
+        teacher = Teacher(
+            name = name,
+            age = age,
+            email = email,
+            subject = subject
+        )
+        teacher.save()
+        print(f" Вчителя '{name,}' успішно додано!")
+    except Exception as e:
+        print(f"Помилка прии додаванні вчителя: {e}")
+
+
+def add_class():
+    print("\nДодавання Класу")
+    name = input("Введіть назву Класу :").strip()
+
+    if not name:
+        print("Назва Класу не може бути порожнім")
+        return
+    
+    if Class.objects.filter(name = name).exists():
+        print(f"Клас з назвою '{name}' вже існує!")
+        return
+    
+
+    class_new = Class(name = name)
+    class_new.save()
+
+    print(f"Клас '{name}' успішно доданий!")
+    
+
+
+
+################################
+
+
+def add_students():
+    print("\nДодавання студента")
+    name = input("Введіть ім'я студента:").strip().lower()
+    title = input("Ведіть опис цього студента").strip().lower()
+    age = input("Введіть вік студента:").strip().lower()
+    email = input("Ведіть почту студента:").strip().lower()
+    student_class = input("В якому класі цей студент").strip().lower()
+
+    if not all([name, title, age, email, student_class]):
+        print("Ім'я студента та його інформація не можу бути порожньою")
+        return
+
+    try:
+        student = Class.objects.get(name = student_class)
+    except ObjectDoesNotExist:
+        print(f"Такого студента '{name}' не знайдено! ")
+        return
+    
+
+    try:
+        student = Students(
+            name = name,
+            title = title,
+            age = age,
+            email = email,
+            student = student
+        )
+        
+        student.save()
+
+        print(f"Студента '{name}' додано успішно!")
+    except Exception as e:
+        print(f"Помилка при додавані учня:{e}")
+
+
+
+
+def add_lessons_schedule():
+    print("\nДодавання заняття в розклад")
+    name = input("Введіть назву заняття :").strip().lower()
+
+    if not name:
+        print("Назва заняття не може бути порожнім")
+        return
+
+    if Schedule.objects.filter(name = name).exists():
+        print("Такий клас вже існує")
+        return
+    
+    shedule = Schedule(name = name)
+    shedule.save()
+    print(f"{name} успішно додано!")
+
+def add_grade():
+    print("\nДодавання оцінку")
+    grade = input("Введіть оцінку:").strip().lower()
+    students = input("Ведіть оцінку учня").strip().lower()
+    
+
+    if not all([grade, students]):
+        print("поле з оцінкою не може бути порожнім")
+        return
+
+    
+    grade = Grade(grade = grade, students=students)
+    grade.save()
+    print(f"{grade} успішно додано!")
+
+
+def main():
+    while True:
+        print("УПРАВЛІННЯ ШКІЛЬНИМ РОЗКЛАДОМ")
+        print("1 - Додати предмет")
+        print("2 - Додати вчителя")
+        print("3 - Додати клас")
+        print("4 - Додати учня")
+        print("5 - Додати заняття в розклад")
+        print("6 - Додати оцінку")
+        print("7 - Вийти")
+        choice = input("Виберіть опцію від 1 до 7: ").strip()
+
+
+        if choice == '1':
+            add_subject()
+        if choice == '2':
+            add_subject()
+        if choice == '3':
+            add_subject()
+        if choice == '4':
+            add_subject()
+        if choice == '5':
+            add_subject()
+        if choice == '6':
+            add_subject()
+        if choice == '7':
+            print("Програма завершена.")
+            break
+        else:
+            print("Невірний виріб! Обирайте уважніше")
+        
+            
+
+
+
+
+
+
+
+
