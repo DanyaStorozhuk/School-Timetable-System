@@ -7,7 +7,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "school_timetable.settings")
 django.setup()
 
 
-
+from datetime import datetime 
 from django.core.exceptions import ObjectDoesNotExist
 from schedule.models import Teacher, Class, Students, Subject, Schedule, Grade
 t1 = Teacher.objects.create(name="Ivan Petrow")
@@ -121,7 +121,7 @@ def add_students():
     try:
         student = Class.objects.get(name = student_class)
     except ObjectDoesNotExist:
-        print(f"Такого студента '{name}' не знайдено! ")
+        print(f"Такого класу '{name}' не знайдено! ")
         return
     
 
@@ -129,9 +129,9 @@ def add_students():
         student = Students(
             name = name,
             title = title,
-            age = age,
+            age = int(age),
             email = email,
-            student = student
+            student_class = student_class
         )
         
         student.save()
@@ -145,19 +145,49 @@ def add_students():
 
 def add_lessons_schedule():
     print("\nДодавання заняття в розклад")
-    name = input("Введіть назву заняття :").strip().lower()
+    day = input("Введіть день:").strip().lower()
+    teacher = input("Введіть вчителя: ").strip().lower()
+    students = input("Введіть студента:").strip().lower()
+    subject = input("Введіть назву предмета: ").strip().lower()
+    time_start = input("Введіть час початку (ГГ:ХХ): ").strip()
+    time_end = input("Введіть час закінчення (ГГ:ХХ): ").strip()
 
-    if not name:
-        print("Назва заняття не може бути порожнім")
+    if not all([subject, students, teacher, day, time_start, time_end]):
+        print("Обов'язкові поля не можуть бути порожніми!")
         return
 
-    if Schedule.objects.filter(name = name).exists():
-        print("Такий клас вже існує")
+    # дивимось чи є в "школі" такий предмет, студент та викладач
+    try:
+        existing_subject = Subject.objects.get(name=subject)
+        existing_student = Students.objects.get(name = students)
+        existing_teacher = Teacher.objects.get(name=teacher)
+    except ObjectDoesNotExist as e:
+        print(f"Не знайдено: {e}")
         return
-    
-    shedule = Schedule(name = name)
-    shedule.save()
-    print(f"{name} успішно додано!")
+
+    # перевіряємо чи коректна дата (переводимо в формат Date)
+    try:
+        time_start = datetime.strptime(time_start, "%H:%M")
+        time_end = datetime.strptime(time_end, "%H:%M")
+    except ValueError:
+        print("Неправильний формат часу! Використовуйте ГГ:ХХ")
+        return
+
+    # створюємо та зберігаємо заняття в розкладі
+    try:
+        schedule = Schedule(
+            day = day,
+            students = existing_student,
+            teacher = existing_teacher,
+            subject = existing_subject,
+            time_start=time_start,
+            time_end=time_end
+        )
+        schedule.save()
+        print(f"Заняття успішно додано до розкладу!")
+    except Exception as e:
+        print(f"Помилка при додаванні заняття: {e}")
+
 
 def add_grade():
     print("\nДодавання оцінку")
